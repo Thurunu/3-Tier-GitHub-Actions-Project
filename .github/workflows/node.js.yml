@@ -1,0 +1,29 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CICD
+
+on: # this is the place where we configure at what time actions need to be run, so here we run this action on pushes and pull requests on main
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # at here we are using a shared host to run action, if we setup a self hosteed runner then we can use its name here
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        
+    - name: Frontend Compilation (Syntax Check)
+      run: cd client && find . -name "*.js" -exec node --check {} +
+
+    - name: Backend Compilation (Syntax Check)
+      run: cd api && find . -name "*.js" -exec node --check {} +
