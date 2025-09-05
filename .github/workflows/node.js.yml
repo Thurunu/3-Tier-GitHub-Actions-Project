@@ -70,7 +70,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: SonarQube Scan (client)
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: sonarsource/sonarqube-scan-action@master
         with:
           projectBaseDir: client # in this repo we have both client and server side codes so we have to mention which directory need to look
           args: >
@@ -90,7 +90,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: SonarQube Scan (api)
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: sonarsource/sonarqube-scan-action@master
         with:
           projectBaseDir: api # in this repo we have both client and server side codes so we have to mention which directory need to look
           args: >
