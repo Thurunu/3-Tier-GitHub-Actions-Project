@@ -59,6 +59,47 @@ jobs:
           ignore-unfixed: true      # Ignores vulnerabilities that don’t have a fix available yet (reduces noise, but you might miss awareness of risks)
           vuln-type: 'os,library'   # Scan both OS packages (like apt-installed things) and libraries (like npm packages in node_modules)
           severity: 'CRITICAL,HIGH' # Only report vulnerabilities at these levels. Ignores MEDIUM/LOW to keep signal-to-noise ratio better
-      
 
+  sonar-frontend:
+    runs-on: self-hosted
+    needs: trivy_fs_scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: SonarQube Scan (client)
+        uses: SonarSource/sonarqube-scan-action@5.3.1
+        with:
+          projectBaseDir: client # in this repo we have both client and server side codes so we have to mention which directory need to look
+          args: >
+              -Dsonar.projectKey=myorg_client
+              -Dsonar.projectName=myorg_client
+              -Dsonar.sources=.
+              -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+  sonar-backend:
+    runs-on: self-hosted
+    needs: sonar-frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: SonarQube Scan (api)
+        uses: SonarSource/sonarqube-scan-action@5.3.1
+        with:
+          projectBaseDir: api # in this repo we have both client and server side codes so we have to mention which directory need to look
+          args: >
+              -Dsonar.projectKey=myorg_api
+              -Dsonar.projectName=myorg_api
+              -Dsonar.sources=.
+              -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          
+        
+      
       
