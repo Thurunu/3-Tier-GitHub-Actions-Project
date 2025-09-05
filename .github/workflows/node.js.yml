@@ -36,7 +36,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: GitLeaks Setup
-        uses: gitleaks/gitleaks-action@v2
+        run: |
+          gitleaks detect --source ./client --exit-code 1
+          gitleaks detect --source ./api --exit-code 1
 
       - name: Gitleaks Scan
         run: |
