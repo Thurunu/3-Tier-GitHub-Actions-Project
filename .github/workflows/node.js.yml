@@ -11,7 +11,7 @@ on: # this is the place where we configure at what time actions need to be run, 
 
 jobs:
   compile:
-    runs-on: ubuntu-latest # at here we are using a shared host to run action, if we setup a self hosteed runner then we can use its name here
+    runs-on: GitHubVM # at here we are using a shared host to run action, if we setup a self hosteed runner then we can use its name here
     
     steps:
     - name: Checkout code
@@ -29,7 +29,7 @@ jobs:
       run: cd api && find . -name "*.js" -exec node --check {} +
 
   gitleaks-scan:
-    runs-on: ubuntu-latest
+    runs-on: GitHubVM
     needs: compile 
     steps:
       - name: Checkout code
@@ -44,7 +44,7 @@ jobs:
           gitleaks detect --source ./api --exit-code 1
 
   trivy_fs_scan:
-    runs-on: ubuntu-latest
+    runs-on: GitHubVM
     needs: gitleaks-scan
     steps:
       - name: Checkout code
