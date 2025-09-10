@@ -212,13 +212,19 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.EKS_KUBECONFIG }}" > $HOME/.kube/config
-
+          
+      - name: Create namespace for kubectl
+        run: kubectl create namespace prod
+        
       - name: Deploy to EKS
         run: |
-          kubectl apply -f k8s-prod/sc.yaml
-          kubectl apply -f k8s-prod/mysql.yaml
-          kubectl apply -f k8s-prod/backend.yaml
-          kubectl apply -f k8s-prod/frontend.yaml
+          for file in sc.yaml mysql.yaml backend.yaml frontend.yaml ci.yaml ingress.yaml; do
+            if [ -f "k8s-prod/$file" ]; then
+              kubectl apply -f "k8s-prod/$file"
+            else
+              echo "Warning: k8s-prod/$file not found."
+            fi
+          done
           kubectl apply -f k8s-prod/ci.yaml
           kubectl apply -f k8s-prod/ingress.yaml
 
