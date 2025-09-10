@@ -216,16 +216,47 @@ jobs:
       - name: Create namespace for kubectl
         run: kubectl get namespace prod || kubectl create namespace prod
 
+      - name: Install cert-manager
+        run: |
+          # Check if cert-manager is already installed
+          if ! kubectl get namespace cert-manager >/dev/null 2>&1; then
+            echo "Installing cert-manager..."
+            kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.2/cert-manager.yaml
+            echo "Waiting for cert-manager to be ready..."
+            kubectl wait --for=condition=Available --timeout=300s deployment/cert-manager -n cert-manager
+            kubectl wait --for=condition=Available --timeout=300s deployment/cert-manager-cainjector -n cert-manager
+            kubectl wait --for=condition=Available --timeout=300s deployment/cert-manager-webhook -n cert-manager
+          else
+            echo "cert-manager is already installed"
+          fi
+
+      - name: Install NGINX Ingress Controller
+        run: |
+          # Check if nginx-ingress is already installed
+          if ! kubectl get namespace ingress-nginx >/dev/null 2>&1; then
+            echo "Installing NGINX Ingress Controller..."
+            kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/aws/deploy.yaml
+            echo "Waiting for NGINX Ingress Controller to be ready..."
+            kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=300s
+          else
+            echo "NGINX Ingress Controller is already installed"
+          fi
         
       - name: Deploy to EKS
         run: |
-          for file in sc.yaml mysql.yaml backend.yaml frontend.yaml ci.yaml ingress.yaml; do
+          for file in sc.yaml mysql.yaml backend.yaml frontend.yaml; do
             if [ -f "k8s-prod/$file" ]; then
               kubectl apply -f "k8s-prod/$file"
             else
               echo "Warning: k8s-prod/$file not found."
             fi
           done
+          
+          # Apply cert-manager ClusterIssuer after cert-manager is ready
+          echo "Applying cert-manager ClusterIssuer..."
           kubectl apply -f k8s-prod/ci.yaml
+          
+          # Apply ingress last
+          echo "Applying ingress..."
           kubectl apply -f k8s-prod/ingress.yaml
 
