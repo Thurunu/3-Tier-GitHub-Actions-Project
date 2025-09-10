@@ -154,3 +154,30 @@ jobs:
           file: ./client/Dockerfile
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/frontend:latest
+
+  trivy-scan-docker-image:
+    runs-on: ubuntu-latest
+    needs:  build_frontend_docker_image_and_push
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run trivy image scan for backend
+        uses: aquasecurity/trivy-action@0.28.0
+        with: 
+          scan-type: 'image'           # "fs" = filesystem scan. Scans the current directory (your source code) for vulnerable dependencies & config issues
+          image-ref: ${{ vars.DOCKERHUB_USERNAME }}/backend:latest            # '.' = scan the repo root (the code you checked out). You could point this to client/ or api/ if you want to scan only part
+          format: 'table'           # Output format → nice human-readable table in the Actions logs (other options: json, sarif, template…)
+          ignore-unfixed: true      # Ignores vulnerabilities that don’t have a fix available yet (reduces noise, but you might miss awareness of risks)
+          vuln-type: 'os,library'   # Scan both OS packages (like apt-installed things) and libraries (like npm packages in node_modules)
+          severity: 'CRITICAL,HIGH'
+      - name: Run trivy image scan for frontend
+        uses: aquasecurity/trivy-action@0.28.0
+        with: 
+          scan-type: 'image'           # "fs" = filesystem scan. Scans the current directory (your source code) for vulnerable dependencies & config issues
+          image-ref: ${{ vars.DOCKERHUB_USERNAME }}/frontend:latest            # '.' = scan the repo root (the code you checked out). You could point this to client/ or api/ if you want to scan only part
+          format: 'table'           # Output format → nice human-readable table in the Actions logs (other options: json, sarif, template…)
+          ignore-unfixed: true      # Ignores vulnerabilities that don’t have a fix available yet (reduces noise, but you might miss awareness of risks)
+          vuln-type: 'os,library'   # Scan both OS packages (like apt-installed things) and libraries (like npm packages in node_modules)
+          severity: 'CRITICAL,HIGH'
+
