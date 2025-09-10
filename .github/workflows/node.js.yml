@@ -128,6 +128,7 @@ jobs:
           file: ./api/Dockerfile
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/backend:latest
+          
   build_frontend_docker_image_and_push:
     runs-on: ubuntu-latest
     needs: sonar-backend
@@ -157,7 +158,7 @@ jobs:
 
   trivy-scan-docker-image:
     runs-on: ubuntu-latest
-    needs:  build_frontend_docker_image_and_push
+    needs: build_backend_docker_image_and_push
 
     steps:
       - name: Checkout code
