@@ -214,7 +214,8 @@ jobs:
           echo "${{ secrets.EKS_KUBECONFIG }}" > $HOME/.kube/config
           
       - name: Create namespace for kubectl
-        run: kubectl create namespace prod
+        run: kubectl get namespace prod || kubectl create namespace prod
+
         
       - name: Deploy to EKS
         run: |
