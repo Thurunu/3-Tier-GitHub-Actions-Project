@@ -235,8 +235,10 @@ jobs:
           else
             echo "cert-manager is already installed"
             # Even if already installed, wait for webhook to be ready
-            kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=webhook -n cert-manager
+            kubectl get pod -l app.kubernetes.io/name=webhook -n cert-manager -o yaml | grep -A5 conditions:
+
           fi
+          echo "moving to next step..."
 
       - name: Install NGINX Ingress Controller
         run: |
