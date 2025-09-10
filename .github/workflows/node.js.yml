@@ -223,20 +223,19 @@ jobs:
             echo "Installing cert-manager..."
             kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.2/cert-manager.yaml
             echo "Waiting for cert-manager to be ready..."
-            kubectl wait --for=condition=Available --timeout=300s deployment/cert-manager -n cert-manager
-            kubectl wait --for=condition=Available --timeout=300s deployment/cert-manager-cainjector -n cert-manager
-            kubectl wait --for=condition=Available --timeout=300s deployment/cert-manager-webhook -n cert-manager
+            kubectl wait --for=condition=Available deployment/cert-manager -n cert-manager
+            kubectl wait --for=condition=Available deployment/cert-manager-cainjector -n cert-manager
+            kubectl wait --for=condition=Available deployment/cert-manager-webhook -n cert-manager
             
             echo "Waiting for cert-manager webhook to be ready..."
             # Wait for the webhook service to have endpoints
-            kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=webhook -n cert-manager --timeout=300s
+            kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=webhook -n cert-manager
             
-            # Additional wait to ensure webhook is fully operational
-            sleep 30
+            
           else
             echo "cert-manager is already installed"
             # Even if already installed, wait for webhook to be ready
-            kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=webhook -n cert-manager --timeout=300s
+            kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=webhook -n cert-manager
           fi
 
       - name: Install NGINX Ingress Controller
@@ -246,7 +245,7 @@ jobs:
             echo "Installing NGINX Ingress Controller..."
             kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/aws/deploy.yaml
             echo "Waiting for NGINX Ingress Controller to be ready..."
-            kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=300s
+            kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller
           else
             echo "NGINX Ingress Controller is already installed"
           fi
