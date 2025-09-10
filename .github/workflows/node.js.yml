@@ -158,7 +158,7 @@ jobs:
 
   trivy-scan-docker-image:
     runs-on: ubuntu-latest
-    needs: build_backend_docker_image_and_push
+    needs: [build_backend_docker_image_and_push, build_frontend_docker_image_and_push]
 
     steps:
       - name: Checkout code
