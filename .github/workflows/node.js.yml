@@ -184,7 +184,7 @@ jobs:
 
   setup-k8s-infrastructure:
     runs-on: self-hosted
-    needs: trivy-scan-docker-image
+    needs: trivy-scan-docker-images
 
     steps:
       - name: Checkout code
